@@ -19,6 +19,23 @@ class CPU:
         self.MDR=0 # Memory Data Register
         self.FL=0 # Flags given based on CMP opcode
 
+        # List of all the instructions for passing the ALU Binding CPU functionality to args received in run-time
+        self.inst={
+            0b10000010:self.LDI,
+            0b01000111:self.PRN,
+            0b10100000:self.ADD,
+            0b10100010:self.MUL,
+            0b10100111:self.CMP,
+            0b01000101:self.PUSH,
+            0b01000110:self.POP,
+            0b01010000:self.CALL,
+            0b00010001:self.RET,
+            0b01010100:self.JMP,
+            0b01010110:self.JNE,
+            0b01010101:self.JEQ,
+            0b10000100:self.ST,
+        }
+
     def load(self):
         """Load a program into memory."""
 
@@ -77,7 +94,7 @@ class CPU:
         operand_b = self.ram_read(self.pc + 2)
         while running is True:
             self.IR = self.ram_read(self.pc)
-            if self.IR==0b00000001:
+            if self.IR == 0b00000001:
                 #HLT
                 running=False
             elif self.IR == 0b10000010:
