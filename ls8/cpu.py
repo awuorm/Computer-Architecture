@@ -8,21 +8,21 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
+        self.IR = 0  # Instruction Register running Instruction
+        self.sp = 7  # Stack pointer Pointing at the top of the stack
+        self.MAR = 0  # Memory Address Register
+        self.MDR = 0  # Memory Data Register
+        self.FL = 0  # Flags given based on CMP opcode
         self.pc = 0  # Program Counter address of current executing instruction
         self.reg = [0]*7  # General Purpose Registers
         self.reg.append(0xF4)  # 256 bit Storage
         self.ram = [0]*255  # This will serve as 256 Bytes of RAM storage
-        self.IR = 0  # Instruction Register running Instruction
-        self.sp = 7  # Stack pointer Pointing at the top of the stack
-        """Both Are needed to keep track of where in memory we are, 
-            as well as what is being stored"""
-        self.MAR = 0  # Memory Address Register
-        self.MDR = 0  # Memory Data Register
-        self.FL = 0  # Flags given based on CMP opcode
 
-        # List of all the instructions for passing the ALU Binding CPU functionality to args received in run-time
-        self.inst = {
-            0b10000010: self.LDI,
+        #quiz? Is it a good idea to initialize the registers and ram?
+
+        # List of all the opcodes and corresponding alu functions
+        self.branchtable = {
+            0b10000010: self.LDI, #these are opcodes? aka memory address?
             0b01000111: self.PRN,
             0b10100000: self.ADD,
             0b10100010: self.MUL,
@@ -39,43 +39,35 @@ class CPU:
 
 
     def load(self):
-        """Load a program into memory."""
+        """Load a program into memory. It loads the branchtable into ram"""
         address = 0
-        # For now, we've just hardcoded a program:
-
-        # program = [
-        #     # From print8.ls8
-        #     0b10000010, # LDI R0,8
-        #     0b00000000,
-        #     0b00001000,
-        #     0b01000111, # PRN R0
-        #     0b00000000,
-        #     0b00000001, # HLT
-        # ]
-
-        # for instruction in program:
-        #     self.ram[address] = instruction
-        #     address += 1
         program = []
         with open(sys.argv[1], 'r') as file:
             for line in file:
+                #find lines with comment
                 get = line.find("#")
+                #store the LHS of lines that don't start with comments
                 if get >= 0:
                     line = line[:get]
+                # else move to the next line,if the line starts with a comment
                 get = line.find('\n')
                 if get >= 0:
                     line = line[:get]
                 if len(line) > 1:
                     line = line.strip()
+                #add the new line to program
                     program.append(line)
-
+        #add the new instruction to the ram and increment the address.
         for instruction in program:
+            print(instruction)
             self.ram[address] = int(instruction,2)
             address += 1
 
+    #calling ram_read, provide the address whose contents will be read from
     def ram_read(self, MAR):
         return self.ram[MAR]  # MAR used for read and write
-
+    
+    #calling ram_read, provide the address whose contents will be read from(MDR) and written to(MAR)
     def ram_write(self, MAR, MDR):
         self.ram[MAR] = MDR  # MDR used for last written
 
@@ -244,5 +236,5 @@ class CPU:
             if self.IR == 0b00000001:
                 run = False
             else:
-                self.inst[self.IR]()
+                self.branchtable[self.IR]()
                 self.pc += 1
