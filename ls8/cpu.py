@@ -8,21 +8,42 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        self.IR = 0  # Instruction Register running Instruction
-        self.sp = 7  # Stack pointer Pointing at the top of the stack
+        self.IR = 0  # Instruction Register 
+        self.sp = 7  # Stack pointer 
         self.MAR = 0  # Memory Address Register
         self.MDR = 0  # Memory Data Register
-        self.FL = 0  # Flags given based on CMP opcode
-        self.pc = 0  # Program Counter address of current executing instruction
+        self.FL = 0  # Flags 
+        self.pc = 0  # Program Counter 
         self.reg = [0]*7  # General Purpose Registers
         self.reg.append(0xF4)  # 256 bit Storage
         self.ram = [0]*255  # This will serve as 256 Bytes of RAM storage
 
-        #quiz? Is it a good idea to initialize the registers and ram?
+
+        # quiz? Is it a good idea to initialize the registers and ram?
+        # ALU ops
+        """
+            ADD  10100000 00000aaa 00000bbb
+            SUB  10100001 00000aaa 00000bbb
+            MUL  10100010 00000aaa 00000bbb
+            DIV  10100011 00000aaa 00000bbb
+            MOD  10100100 00000aaa 00000bbb
+
+            INC  01100101 00000rrr
+            DEC  01100110 00000rrr
+
+            CMP  10100111 00000aaa 00000bbb
+
+            AND  10101000 00000aaa 00000bbb
+            NOT  01101001 00000rrr
+            OR   10101010 00000aaa 00000bbb
+            XOR  10101011 00000aaa 00000bbb
+            SHL  10101100 00000aaa 00000bbb
+            SHR  10101101 00000aaa 00000bbb
+        """
 
         # List of all the opcodes and corresponding alu functions
         self.branchtable = {
-            0b10000010: self.LDI, #these are opcodes? aka memory address?
+            0b10000010: self.LDI,  # these are opcodes? aka memory address?
             0b01000111: self.PRN,
             0b10100000: self.ADD,
             0b10100010: self.MUL,
@@ -44,9 +65,9 @@ class CPU:
         program = []
         with open(sys.argv[1], 'r') as file:
             for line in file:
-                #find lines with comment
+                # find lines with comment
                 get = line.find("#")
-                #store the LHS of lines that don't start with comments
+                # store the LHS of lines that don't start with comments
                 if get >= 0:
                     line = line[:get]
                 # else move to the next line,if the line starts with a comment
@@ -55,19 +76,18 @@ class CPU:
                     line = line[:get]
                 if len(line) > 1:
                     line = line.strip()
-                #add the new line to program
+                # add the new line to program
                     program.append(line)
-        #add the new instruction to the ram and increment the address.
+        # add the new instruction to the ram and increment the address.
         for instruction in program:
-            print(instruction)
             self.ram[address] = int(instruction,2)
             address += 1
 
-    #calling ram_read, provide the address whose contents will be read from
+    # calling ram_read, provide the address whose contents will be read from
     def ram_read(self, MAR):
         return self.ram[MAR]  # MAR used for read and write
     
-    #calling ram_read, provide the address whose contents will be read from(MDR) and written to(MAR)
+    # calling ram_read, provide the address whose contents will be read from(MDR) and written to(MAR)
     def ram_write(self, MAR, MDR):
         self.ram[MAR] = MDR  # MDR used for last written
 
